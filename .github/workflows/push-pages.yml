@@ -48,5 +48,5 @@ jobs:
               clean: true
               git-config-name: "3000ye"
               git-config-email: "hcg2924239214@163.com"
-              repository-name: 3000ye/3000ye.github.io
+              repository-name: 3000ye/DHUMasterNotePage
               single-commit: true
