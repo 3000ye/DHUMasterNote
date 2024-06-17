@@ -1,0 +1,45 @@
+# Configure main menu and social menu
+#[[main]]
+#identifier = "home"
+#name = "Home"
+#url = "/"
+#[main.params]
+#icon = "home"
+#newtab = true
+
+# 设置社交账号图标
+[[social]]
+identifier = "github"
+name = "GitHub"
+weight = 1
+url = "https://github.com/3000ye"
+
+[social.params]
+icon = "brand-github"
+
+[[social]]
+identifier = "email"
+name = "Email"
+weight = 2
+url = "mailto:castor_ye@163.com"
+
+[social.params]
+icon = "email"
+
+[[social]]
+identifier = "bilibili"
+name = "Bilibili"
+weight = 3
+url = "https://space.bilibili.com/44756427?spm_id_from=333.1007.0.0"
+
+[social.params]
+icon = "brand-bilibili"
+
+[[social]]
+identifier = "LeetCode"
+name = "LeetCode"
+weight = 4
+url = "http://code.3000ye.com"
+
+[social.params]
+icon = "leetcode"

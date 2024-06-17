@@ -1,0 +1,159 @@
+# Pages placed under these sections will be shown on homepage and archive page.
+mainSections = ["post"]
+# Output page's full content in RSS.
+rssFullContent = true
+favicon = "/CC.ico"
+
+[footer]
+since = 2023
+customText = ""
+
+[dateFormat]
+published = "Jan 02, 2006"
+lastUpdated = "Jan 02, 2006 15:04 MST"
+
+[sidebar]
+# emoji = "🍥"
+# compact = true
+subtitle = "Let life be beautiful like summer flowers."
+
+# 头像设置
+[sidebar.avatar]
+enabled = true
+local = true
+src = "img/CC.jpg"
+
+# 数学支持 KaTex
+[article]
+math = true
+readingTime = true
+toc = true
+
+[article.license]
+enabled = true
+default = "Licensed under CC BY-NC-SA 4.0"
+
+# 右边的导航栏，展示分类，标签等等
+## home 界面导航栏
+[[widgets.homepage]]
+type = "search"
+
+[[widgets.homepage]]
+type = "archives"
+
+[widgets.homepage.params]
+limit = 5
+
+[[widgets.homepage]]
+type = "categories"
+
+[widgets.homepage.params]
+limit = 10
+
+[[widgets.homepage]]
+type = "tag-cloud"
+
+[widgets.homepage.params]
+limit = 10
+
+## 正文界面导航栏
+[[widgets.page]]
+type = "toc"  # 正文大纲
+
+# 分享到Twitter，对国内用户基本没用
+[opengraph.twitter]
+site = ""
+card = ""
+
+# 如果页面没有指定封面的话，则默认使用该图片
+[defaultImage.opengraph]
+enabled = false
+local = false
+src = ""  # 指定nord背景为默认封面
+
+# 自动夜间/日间模式
+[colorScheme]
+toggle = true
+default = "auto"
+
+# resize项目中的图片
+[imageProcessing.cover]
+enabled = true
+
+[imageProcessing.content]
+enabled = true
+
+## Comments  设置disqus评论功能
+[comments]
+enabled = false
+provider = "disqus"
+
+[comments.disqusjs]
+shortname = ""
+apiUrl = ""
+apiKey = ""
+admin = ""
+adminLabel = ""
+
+[comments.utterances]
+repo = ""
+issueTerm = "pathname"
+label = ""
+
+[comments.remark42]
+host = ""
+site = ""
+locale = ""
+
+[comments.vssue]
+platform = ""
+owner = ""
+repo = ""
+clientId = ""
+clientSecret = ""
+autoCreateIssue = false
+
+[comments.waline]
+serverURL = ""
+lang = ""
+visitor = ""
+avatar = ""
+emoji = ["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"]
+requiredMeta = ["name", "email", "url"]
+placeholder = ""
+
+[comments.waline.locale]
+admin = "Admin"
+
+[comments.twikoo]
+envId = ""
+region = ""
+path = ""
+lang = ""
+
+[comments.cactus]
+defaultHomeserverUrl = "https://matrix.cactus.chat:8448"
+serverName = "cactus.chat"
+siteName = ""
+
+[comments.giscus]
+repo = ""
+repoID = ""
+category = ""
+categoryID = ""
+mapping = ""
+lightTheme = ""
+darkTheme = ""
+reactionsEnabled = 1
+emitMetadata = 0
+
+[comments.gitalk]
+owner = ""
+admin = ""
+repo = ""
+clientID = ""
+clientSecret = ""
+
+[comments.cusdis]
+host = ""
+id = ""
