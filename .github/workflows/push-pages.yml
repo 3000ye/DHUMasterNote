@@ -41,7 +41,8 @@ jobs:
           - name: Deploy to GitHub Pages
             uses: JamesIves/github-pages-deploy-action@v4.5.0
             with:
-              ssh-key: ${{ secrets.SSH }}
+              # ssh-key: ${{ secrets.SSH }}
+              token: ${{ secrets.TOKEN }}
               branch: main
               folder: public
               commit-message: update pages
