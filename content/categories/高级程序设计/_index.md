@@ -1,7 +1,7 @@
 ---
 title: 高级程序设计
 description: 2024暑期课程：高级程序设计（黄秋波）
-# image: nord.jpg
+image: chaoxing.png
 
 # Badge style
 style:
