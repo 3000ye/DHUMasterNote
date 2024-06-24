@@ -1,6 +1,6 @@
 ---
 title: "Ch0: 结构体与指针"
-description: 
+description: "Ch0: 结构体与指针"
 date: 2024-06-17T13:52:36+08:00
 image: 
 math: true
@@ -74,4 +74,26 @@ int i = 1, j = 2;   // 变量
 int *p1 = &i, *p2 = &j;    // 指针变量
 ```
 
-## 引用
+### 指针与引用做函数参数
+
+在函数参数传递时，实参传递给形参的时候是按 **值** 传递的，形参实际是实参的拷贝，即函数的运行不会影响实参本身。
+
+传递变量的指针或引用，可以在函数运行时可以修改实参本身，其中引用更加便于理解。
+
+```cpp
+// 直接传递变量
+void notChange(int x) { x ++; }
+// 传递变量的指针
+void change(int *x) { x ++; }
+// 传递变量的引用
+void change2(int &x) { x ++; }
+
+int main() {
+    int a = 1, b = 1, c = 1;
+
+    notChange(a);
+    change(&b);
+    change2(c);
+}
+```
+
