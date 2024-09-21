@@ -125,7 +125,7 @@ X^{\prime}=\frac{X-\mu}\sigma
 $$
 其中 $\mu, \sigma$ 分别为特征的均值和标准差。
 
-### K 近邻的视线：KD 树
+## K 近邻的实现：KD 树
 
 使用最简单的【线性扫描（linear scan）】实现 K 近邻：
 - 计算输入实例与每一个训练实例的距离
@@ -142,7 +142,7 @@ KD 树（K-Dimensional Tree）则是一种用于加速 KNN 查询的高效数据
 <img src='assets/KD树.png' alt='img' style='zoom:100%;' />
 </div>
 
-#### 构造 KD 树
+### 构造 KD 树
 
 KD 树的每一层按照一个维度进行划分。
 
@@ -171,47 +171,231 @@ class KDTreeNode:
         self.right = right  # 右子树
 
 
-def genKDTree(points: list, depth: int = 0):
-    """
-    递归构造 KD 树
-    :param points: 实例坐标序列 
-    :param depth: 当前深度
-    :return: KD 树
-    """
+class KDTree:
+    def __init__(self, points):
+        self.root = self.gen_kd_tree(points, depth=0)
     
-    if not points:
-        return None
-    
-    # 计算当前维度，1, 2, ..., N, 1, 2, ... N, 1, ... 循环
-    axis = depth % len(points[0])
-    # 根据当前维度排序
-    points.sort(key=lambda x: x[axis])
-    # 计算中位数下标，取靠左位置
-    mid = len(points) // 2
-    
-    return KDTreeNode(
-        points[mid],
-        genKDTree(points[:mid], depth + 1),
-        genKDTree(points[mid + 1:], depth + 1)
-    )
+    def gen_kd_tree(self, points, depth):
+        """
+        递归构造 KD 树
+        :param points: 实例坐标序列 
+        :param depth: 当前深度
+        :return: KD 树
+        """
+        
+        if not points:
+            return None
 
-
-def printKDTree(node: KDTreeNode, depth: int = 0):
-    """打印 KD 树"""
+        # 计算当前维度，1, 2, ..., N, 1, 2, ... N, 1, ... 循环
+        axis = depth % len(points[0])
+        # 根据当前维度排序
+        points.sort(key=lambda x: x[axis])
+        # 计算中位数下标，取靠左位置
+        mid = len(points) // 2
     
-    if not node:
-        return
+        return KDTreeNode(
+            points[mid],
+            self.gen_kd_tree(points[:mid], depth + 1),
+            self.gen_kd_tree(points[mid + 1:], depth + 1)
+        )
     
-    print(" " * depth + f"Depth {depth}, Point: {node.point}")
-    printKDTree(node.left, depth + 1)
-    printKDTree(node.right, depth + 1)
-
-
-if __name__ == "__main__":
-    points = [(2, 3), (5, 4), (9, 6), (4, 7), (8, 1), (7, 2), (6, 3), (3, 5), (2, 6), (1, 4)]
-    tree = genKDTree(points)
-    printKDTree(tree)
+    def show_kd_tree(self):
+        """打印 KD 树"""
+        
+        if not self.root:
+            return
+        else:
+            return self._show_kd_tree(self.root)
+    
+    def _show_kd_tree(self, node, depth=0):
+        if not node:
+            return
+    
+        print(" " * depth + f"Depth {depth}, Point: {node.point}")
+        self._show_kd_tree(node.left, depth + 1)
+        self._show_kd_tree(node.right, depth + 1)
 ```
 
-#### 搜索 KD 树
+测试代码：
+
+```python
+if __name__ == "__main__":
+    points = [(2, 3), (5, 4), (9, 6), (4, 7), (8, 1), (7, 2), (6, 3), (3, 5), (2, 6), (1, 4)]
+
+    tree = KDTree(points)
+    tree.show_kd_tree()
+```
+
+输出结果：
+
+```shell
+Depth 0, Point: (5, 4)
+ Depth 1, Point: (3, 5)
+  Depth 2, Point: (2, 3)
+   Depth 3, Point: (1, 4)
+  Depth 2, Point: (4, 7)
+   Depth 3, Point: (2, 6)
+ Depth 1, Point: (6, 3)
+  Depth 2, Point: (8, 1)
+   Depth 3, Point: (7, 2)
+  Depth 2, Point: (9, 6)
+```
+
+### 搜索 KD 树
+
+输入：已构造的 KD 树，目标点 $x$ 和要找的近邻点数量 $k$。
+
+输出：$x$ 的 $k$ 个最近邻。
+
+1. 从根结点开始递归搜索，设查询点为 `point`
+2. 比较当前节点
+    - 判断当前节点的分割维度 `axis` ：根据当前节点的分割维度，比较查询点 `point` 和当前结点 `cur`。
+    - 若在维度 `axis` 上 `point` 小于 `cur`，则搜索左子树，反之搜索右子树。
+3. 递归搜索：在选定的子树中继续进行上述比较，直到到达叶结点。
+4. 更新最近邻点
+    - 到达叶结点时，检查 `cur` 与 `point` 的距离，更新当前已知的最近邻点（最小距离）。
+5. 回溯搜索
+    - 在回溯的过程中，检查另一侧子树（即上一步未搜索的子树）。
+    - 计算 `cur` 到 `point` 的距离，并判断这个距离是否小于当前已知的最小距离。
+    - 如果是，则需要在另一侧子树中进行搜索。
+6. 终止条件：如果所有可能的路径都走完了，则终止搜索
+
+Python 代码实现 KD 树的搜索：
+
+```python
+class KDTreeNode:
+    """KD 树的结点类"""
+    def __init__(self, point=None, left=None, right=None):
+        self.point = point  # 结点坐标
+        self.left = left  # 左子树
+        self.right = right  # 右子树
+
+
+class KDTree:
+    def __init__(self, points):
+        self.root = self.gen_kd_tree(points, depth=0)
+    
+    def gen_kd_tree(self, points, depth):
+        """
+        递归构造 KD 树
+        :param points: 实例坐标序列 
+        :param depth: 当前深度
+        :return: KD 树
+        """
+        
+        if not points:
+            return None
+
+        # 计算当前维度，1, 2, ..., N, 1, 2, ... N, 1, ... 循环
+        axis = depth % len(points[0])
+        # 根据当前维度排序
+        points.sort(key=lambda x: x[axis])
+        # 计算中位数下标，取靠左位置
+        mid = len(points) // 2
+    
+        return KDTreeNode(
+            points[mid],
+            self.gen_kd_tree(points[:mid], depth + 1),
+            self.gen_kd_tree(points[mid + 1:], depth + 1)
+        )
+
+    def query(self, point, k=1) -> list:
+        nearest_points = []
+        self._query(self.root, point, k, nearest_points, 0)
+        
+        return nearest_points
+    
+    def _query(self, node, point, k, nearest_points, depth: int=0) -> None:
+        """
+        查询目标点 point 的 k 个近邻点
+        :param node: KD Tree 当前结点
+        :param point: 目标点
+        :param k: 近邻点的个数
+        :param nearest_points: 近邻点列表 
+        """
+        
+        if node is None:
+            return
+        
+        # 计算当前节点到查询点的距离（欧式距离）
+        dist = np.linalg.norm(np.array(point) - np.array(node.point))
+        
+        # 如果近邻点数量不够或当前点距离更近，则将当前节点的点加入近邻点列表
+        if len(nearest_points) < k or dist < np.linalg.norm(np.array(nearest_points[-1]) - np.array(point)):
+            if len(nearest_points) == k:
+                nearest_points.pop()
+            nearest_points.append(node.point)
+            nearest_points.sort(key=lambda x: np.linalg.norm(np.array(x) - np.array(point)))
+        
+        # 确定当前维度
+        axis = depth % len(node.point)
+        
+        # 选择左子树或右子树
+        diff = point[axis] - node.point[axis]        
+        if diff < 0:
+            self._query(node.left, point, k, nearest_points, depth + 1)
+            
+            # 如果近邻点数量不够或有更近的点，则回溯另一棵子树
+            if len(nearest_points) < k or abs(diff) < np.linalg.norm(np.array(nearest_points[-1]) - np.array(point)):
+                self._query(node.right, point, k, nearest_points, depth + 1)
+        else:
+            self._query(node.right, point, k, nearest_points, depth + 1)
+            
+            # 如果近邻点数量不够或有更近的点，则回溯另一棵子树
+            if len(nearest_points) < k or abs(diff) < np.linalg.norm(np.array(nearest_points[-1]) - np.array(point)):
+                self._query(node.left, point, k, nearest_points, depth + 1)
+```
+
+测试代码：
+
+```
+if __name__ == "__main__":
+    points = [(2, 3), (5, 4), (9, 6), (4, 7), (8, 1), (7, 2), (6, 3), (3, 5), (2, 6), (1, 4)]
+    tree = KDTree(points)
+
+    point = points[0]
+    ls = tree.query(point, 5)
+
+    print(f"{point}: {ls}")
+```
+
+输出结果：
+
+```shell
+(1, 4): [(1, 4), (2, 3), (3, 5), (2, 6), (5, 4)]
+```
+
+使用 `sklearn.neighbors` 验证算法：
+
+```python
+import numpy as np
+from sklearn.neighbors import NearestNeighbors
+
+points = [(2, 3), (5, 4), (9, 6), (4, 7), (8, 1), (7, 2), (6, 3), (3, 5), (2, 6), (1, 4)]
+X = np.array(points)
+nbrs = NearestNeighbors(n_neighbors=5, algorithm="kd_tree", metric="minkowski", p=2).fit(X)
+distances, indices = nbrs.kneighbors(X)
+
+for i in range(len(points)):
+    print(f"距离 {points[i]} 最近的 {5} 个点为：")
+    for j in range(5):
+        print(f"    点 {points[indices[i][j]]}，距离为：{distances[i][j]}")
+        
+    break
+```
+
+输出结果：
+
+```shell
+距离 (1, 4) 最近的 5 个点为：
+    点 (1, 4)，距离为：0.0
+    点 (2, 3)，距离为：1.4142135623730951
+    点 (2, 6)，距离为：2.23606797749979
+    点 (3, 5)，距离为：2.23606797749979
+    点 (5, 4)，距离为：4.0
+```
+
+结论：手写算法和 `sklearn` 的方法结果一致。
+
+## 评估指标
 
