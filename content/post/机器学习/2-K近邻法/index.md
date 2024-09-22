@@ -2,7 +2,7 @@
 title: "Ch2: K 近邻法"
 description: 
 date: 2024-09-18T17:56:45+08:00
-image: 
+image: assets/ML.jpg
 math: true
 toc: true
 categories:
@@ -398,4 +398,78 @@ for i in range(len(points)):
 结论：手写算法和 `sklearn` 的方法结果一致。
 
 ## 评估指标
+### 分类评估指标
+
+1. 混淆矩阵（Confusion Matrix）:
+    - 混淆矩阵是一个表格，用于描述分类模型的性能。它显示了实际类别与模型预测类别之间的关系。
+    - 混淆矩阵的四个基本元素：真正类（TP）、假正类（FP）、真负类（TN）、假负类（FN）。
+
+<div style='display: flex; justify-content: center;'>
+<img src='assets/混淆矩阵.drawio.svg' alt='img' style='zoom:80%;' />
+</div>
+
+2. 准确率（Accuracy）:
+   - 准确率是最直观的性能指标，它表示模型正确预测的样本数占总样本数的比例。
+   - 计算公式：$ \text{Accuracy} = \frac{\text{正确预测的样本数}}{\text{总样本数}} $
+3. 精确率（Precision）:
+   - 精确率衡量的是模型预测为正类的样本中，实际为正类的比例。
+   - 计算公式：$ \text{Precision} = \frac{\text{真正类（True Positives, TP）}}{\text{真正类 + 假正类（False Positives, FP）}} $
+4. 召回率（Recall）:
+   - 召回率衡量的是所有实际正类样本中，被模型正确预测为正类的比例。
+   - 计算公式：$ \text{Recall} = \frac{\text{真正类（TP）}}{\text{真正类 + 假负类（False Negatives, FN）}} $
+5. F1 分数（F1 Score）:
+   - F1 分数是精确率和召回率的调和平均数，它在两者之间取得平衡，特别适用于正负样本不平衡的情况。
+   - 计算公式：$ \text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} $
+6. ROC 曲线和 AUC 分数:
+   - ROC 曲线（Receiver Operating Characteristic Curve）是一种用于评估二分类模型性能的工具，它通过绘制不同阈值下的真正类率（召回率）和假正类率（1-特异性）来展示模型性能。
+   - AUC（Area Under the Curve）分数是 ROC 曲线下的面积，它衡量模型的整体性能。AUC 值越高，模型性能越好。
+7. 特异性（Specificity）:
+   - 特异性衡量的是模型正确预测负类的能力，即所有实际负类样本中，被模型正确预测为负类的比例。
+   - 计算公式：$ \text{Specificity} = \frac{\text{真负类（TN）}}{\text{真负类 + 假负类（FN）}} $
+8. 对数损失（Log Loss）:
+   - 对数损失（也称为交叉熵损失）是一种评估概率预测准确性的方法，它对错误的预测给予更大的惩罚。
+   - 计算公式：$ \text{Log Loss} = -\frac{1}{N} \sum_{i=1}^{N} [y_i \log(p_i) + (1 - y_i) \log(1 - p_i)] $
+   - 其中 $ y_i $ 是实际标签，$ p_i $ 是模型预测为正类的概率。
+
+准确率（Accuracy）指标的缺点：在【样本不平衡】的情况下，准确率并不能作为很好的指标。比如样本中，正负样本的比例为 $9:1$，此时我们只需将全部样本预测为正，即可获得
+<svg xmlns="http://www.w3.org/2000/svg" width="4.147ex" height="1.824ex" viewBox="0 -750 1833 806" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" style=""><defs><path id="MJX-198-TEX-N-39" d="M352 287Q304 211 232 211Q154 211 104 270T44 396Q42 412 42 436V444Q42 537 111 606Q171 666 243 666Q245 666 249 666T257 665H261Q273 665 286 663T323 651T370 619T413 560Q456 472 456 334Q456 194 396 97Q361 41 312 10T208 -22Q147 -22 108 7T68 93T121 149Q143 149 158 135T173 96Q173 78 164 65T148 49T135 44L131 43Q131 41 138 37T164 27T206 22H212Q272 22 313 86Q352 142 352 280V287ZM244 248Q292 248 321 297T351 430Q351 508 343 542Q341 552 337 562T323 588T293 615T246 625Q208 625 181 598Q160 576 154 546T147 441Q147 358 152 329T172 282Q197 248 244 248Z"></path><path id="MJX-198-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-198-TEX-N-25" d="M465 605Q428 605 394 614T340 632T319 641Q332 608 332 548Q332 458 293 403T202 347Q145 347 101 402T56 548Q56 637 101 693T202 750Q241 750 272 719Q359 642 464 642Q580 642 650 732Q662 748 668 749Q670 750 673 750Q682 750 688 743T693 726Q178 -47 170 -52Q166 -56 160 -56Q147 -56 142 -45Q137 -36 142 -27Q143 -24 363 304Q469 462 525 546T581 630Q528 605 465 605ZM207 385Q235 385 263 427T292 548Q292 617 267 664T200 712Q193 712 186 709T167 698T147 668T134 615Q132 595 132 548V527Q132 436 165 403Q183 385 203 385H207ZM500 146Q500 234 544 290T647 347Q699 347 737 292T776 146T737 0T646 -56Q590 -56 545 0T500 146ZM651 -18Q679 -18 707 24T736 146Q736 215 711 262T644 309Q637 309 630 306T611 295T591 265T578 212Q577 200 577 146V124Q577 -18 647 -18H651Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)"><g data-mml-node="math"><g data-mml-node="mn"><use xlink:href="#MJX-198-TEX-N-39"></use><use xlink:href="#MJX-198-TEX-N-30" transform="translate(500, 0)"></use></g><g data-mml-node="mi" transform="translate(1000, 0)"><use xlink:href="#MJX-198-TEX-N-25"></use></g></g></g></svg>
+的准确率，显然是没有意义的。
+
+### 回归评估指标
+
+1. 平均绝对误差：
+
+$$
+MAE=\frac{1}{m}\sum_{i=1}^{m}|f(x_{i})-y_{i}|
+$$
+
+2. 平均绝对百分误差：
+
+$$
+MAPE=\frac{100}{m}\sum_{i=1}^m\left|\frac{y_i-f(x_i)}{y_i}\right|
+$$
+
+3. 均方误差：
+
+$$
+MSE = \frac{1}{m} \sum_{i=1}^{m}(f(x_i)-y_i)^2
+$$
+
+4. 均方根误差：
+
+$$
+RMSE = \sqrt{MSE}
+$$
+
+5. $R^2$ 决定系数：
+
+$$
+R^2=\frac{SSR}{SST}=\frac{\sum_i^m(f(x_i)-\dot{y})^2}{\sum_i^m(y_i-\dot{y})^2}
+$$
+
+6. 校正决定系数：
+
+$$
+R^2_{adjusted}=1-\frac{(1-R^2)(m-1)}{m-n-1}
+$$
 

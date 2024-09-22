@@ -2,7 +2,7 @@
 title: "Ch1: 机器学习概述"
 description: 
 date: 2024-09-16T14:00:32+08:00
-image: 
+image: assets/ML.jpg
 math: true
 toc: true
 categories:
