@@ -1,5 +1,5 @@
 ---
-title: "Ch4 朴素贝叶斯"
+title: "Ch4: 朴素贝叶斯"
 description: 
 date: 2024-09-24T10:00:07+08:00
 image: assets/ML.jpg
