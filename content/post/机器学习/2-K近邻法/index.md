@@ -473,3 +473,267 @@ $$
 R^2_{adjusted}=1-\frac{(1-R^2)(m-1)}{m-n-1}
 $$
 
+## Python 代码实现 KNN
+### Python 代码实现 KNN 分类
+
+使用 `sklearn.datasets.load_iris()` 数据集，手写实现 KNN 分类。
+
+#### 加载数据
+
+```python
+# 读取相应的库
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+
+# 读取数据 X, y
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+```
+
+#### 计算闵氏距离
+
+```python
+def minkowski_distance(instance1: np.array, instance2: np.array, p: int):
+    """
+    计算闵氏距离，p = -1 时为切比雪夫距离
+    """
+    
+    if p not in (-1, 1, 2):
+        raise ValueError("p must be -1, 1, 2")
+    
+    diff = np.abs(instance1 - instance2)
+    if p > 0:
+        return np.sum(diff ** p) ** (1 / p)
+    elif p:
+        return max(diff)
+```
+
+#### 标准化和归一化
+
+```python
+def standard_X(data, std):
+    def standard_scaler(data: np.array):
+        # 计算每个特征的均值和标准差
+        mean = data.mean(axis=0)
+        std = data.std(axis=0)
+        # 避免除以0的情况，对于标准差为0的特征，不进行标准化
+        std[std == 0] = 1
+        
+        return (data - mean) / std
+    
+    
+    def normalizer(data: np.array):
+        # 计算每个特征的最小值和最大值
+        min_val, max_val = data.min(axis=0), data.max(axis=0)
+        
+        # 避免除以0的情况，对于最大值和最小值相同的特征，不进行归一化
+        return (data - min_val) / (max_val - min_val + np.finfo(float).eps)
+    
+    if std == 0:
+        return X
+    if std == 1:
+        return standard_scaler(X)
+    if std == 2:
+        return normalizer(X)
+    
+    raise ValueError("std must be 0, 1, 2")
+```
+
+#### 分类训练
+
+```python
+from collections import Counter  # 为了做投票
+
+
+def knn_classify(
+        X: np.array,  # 训练数据的特征
+        y: np.array,  # 训练数据的标签
+        test_instance: np.array,  # 待预测点
+        k: int,  # 近邻数量
+        p: int,  # 距离度量
+):
+    """给定待预测点 test_instance，返回它的标签"""
+    
+    distance = [minkowski_distance(x, test_instance, p) for x in X]
+    k_neighbor = np.argsort(distance)[:k]
+    cnt = Counter(y[k_neighbor])
+    return cnt.most_common()[0][0]
+```
+
+#### 开始训练并查看结果
+
+```python
+import pandas as pd
+
+# 定义超参数
+minkowski_dict = { "欧式距离": 2, "曼哈顿距离": 1, "切比雪夫距离": -1 }
+standard_dict = { "无标准化": 0, "标准化": 1, "归一化": 2 }
+k = 3  # 3 个近邻
+
+# 训练并计算 accuracy
+acc_dict = {
+    dist_name: {} for dist_name in minkowski_dict.keys()
+}
+for dist_name, p in minkowski_dict.items():
+    for std_name, std in standard_dict.items():
+        # 1. 标准化
+        X_std = standard_X(X, std)
+        # 2. 把数据分成训练数据和测试数据
+        X_train, X_test, y_train, y_test = train_test_split(X_std, y, random_state=2003)
+        # 3. 训练预测
+        y_pred = [knn_classify(X_train, y_train, data, k, p) for data in X_test]
+        # 4. 计算 accuracy
+        corr = np.count_nonzero((y_pred == y_test) == True)
+        acc_dict[dist_name][std_name] = corr / len(X_test)
+
+acc_df = pd.DataFrame(acc_dict)
+acc_df
+```
+
+输出结果：
+
+```shell
+            欧式距离   曼哈顿距离  切比雪夫距离
+无标准化     0.921053   0.921053    0.921053
+标准化       0.921053   0.921053    0.894737
+归一化       0.894737   0.921053    0.868421
+```
+
+### Python 代码实现 KNN 回归
+
+使用 `sklearn.datasets.load_diabetes()` 数据集，手写实现 KNN 回归。
+
+#### 加载数据
+
+```python
+# 读取相应的库
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+
+# 读取数据 X, y
+iris = datasets.load_diabetes()
+X = iris.data
+y = iris.target
+```
+
+#### 计算闵氏距离
+
+```python
+def minkowski_distance(instance1: np.array, instance2: np.array, p: int):
+    """
+    计算闵氏距离，p = -1 时为切比雪夫距离
+    """
+    
+    if p not in (-1, 1, 2):
+        raise ValueError("p must be -1, 1, 2")
+    
+    diff = np.abs(instance1 - instance2)
+    if p > 0:
+        return np.sum(diff ** p) ** (1 / p)
+    elif p:
+        return max(diff)
+```
+
+#### 标准化和归一化
+
+```python
+def standard_X(data, std):
+    def standard_scaler(data: np.array):
+        # 计算每个特征的均值和标准差
+        mean = data.mean(axis=0)
+        std = data.std(axis=0)
+        # 避免除以0的情况，对于标准差为0的特征，不进行标准化
+        std[std == 0] = 1
+        
+        return (data - mean) / std
+    
+    
+    def normalizer(data: np.array):
+        # 计算每个特征的最小值和最大值
+        min_val, max_val = data.min(axis=0), data.max(axis=0)
+        
+        # 避免除以0的情况，对于最大值和最小值相同的特征，不进行归一化
+        return (data - min_val) / (max_val - min_val + np.finfo(float).eps)
+    
+    if std == 0:
+        return X
+    if std == 1:
+        return standard_scaler(X)
+    if std == 2:
+        return normalizer(X)
+    
+    raise ValueError("std must be 0, 1, 2")
+```
+
+#### 计算均方根误差
+
+```python
+def calc_RMSE(y_pred, y):
+    """计算 RMSE"""
+    
+    mse = np.mean((y_pred - y) ** 2)
+    return mse ** 0.5
+```
+
+#### 回归训练
+
+```python
+def knn_regression(
+        X: np.array,  # 训练数据的特征
+        y: np.array,  # 训练数据的标签
+        test_instance: np.array,  # 待预测点
+        k: int,  # 近邻数量
+        p: int,  # 距离度量
+):
+    """给定待预测点 test_instance，返回它的标签和EMSE"""
+    
+    distance = [minkowski_distance(x, test_instance, p) for x in X]
+    k_neighbor = np.argsort(distance)[:k]
+    pred = np.mean(y[k_neighbor])
+    
+    return pred
+```
+
+#### 开始训练并查看结果
+
+```python
+import pandas as pd
+
+# 定义超参数
+minkowski_dict = { "欧式距离": 2, "曼哈顿距离": 1, "切比雪夫距离": -1 }
+standard_dict = { "无标准化": 0, "标准化": 1, "归一化": 2 }
+k = 3  # 3 个近邻
+
+# 训练并计算 RMSE
+rmse_dict = {
+    dist_name: {} for dist_name in minkowski_dict.keys()
+}
+for dist_name, p in minkowski_dict.items():
+    for std_name, std in standard_dict.items():
+        # 1. 标准化
+        X_std = standard_X(X, std)
+        # 2. 把数据分成训练数据和测试数据
+        X_train, X_test, y_train, y_test = train_test_split(X_std, y, random_state=2003)
+        # 3. 训练预测
+        y_pred = [knn_regression(X_train, y_train, data, k, p) for data in X_test]
+        # 4. 计算 RMSE
+        rmse = calc_RMSE(y_pred, y_test)
+        rmse_dict[dist_name][std_name] = rmse
+
+rmse_df = pd.DataFrame(rmse_dict)
+rmse_df
+```
+
+结果输出：
+
+```shell
+            欧式距离    曼哈顿距离   切比雪夫距离
+无标准化    63.901913   66.211146    62.973627
+标准化      63.901913   66.211146    62.973627
+归一化      65.251128   65.133189    58.437821
+```
