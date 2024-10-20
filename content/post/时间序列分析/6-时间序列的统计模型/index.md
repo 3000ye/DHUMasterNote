@@ -47,7 +47,7 @@ $$
 y_t = \phi_0 + \phi_1 \times y_{t - 1} + e_t
 $$
 
-假设这个过程是平稳的（均值恒定为 $\mu$，方差恒定为 $\sigma^2$），则根据平稳性的定义有：
+（怀特假设）假设这个过程是平稳的（均值恒定为 $\mu$，方差恒定为 $\sigma^2$），则根据平稳性的定义有：
 
 $$E(y_t) = \mu = E(y_{t - 1})$$
 
@@ -94,3 +94,41 @@ $$
 
 #### 自回归模型 $AR(p)$ 的参数选择
 
+通过【随机过程】和【偏自相关函数】的【可视化】可以评估数据是否适用于自回归模型，一个自回归随机过程的偏自相关函数将在阶次超过 $p$ 时变为 0（这是凭经验得到的）。如下图中可以看出，在 $p = 3$ 后偏自相关函数变为 0。
+
+<div style='display: flex; justify-content: center;'>
+<img src='assets/6-1.png' alt='img' style='zoom:50%;' />
+</div>
+
+通过函数自动确定自回归模型的阶次：
+
+```python
+from statsmodels.tsa.ar_model import AutoReg
+
+model = AutoReg(data, lags=n)
+results = model.fit()
+
+print(results.params)
+```
+
+验证函数输出的参数：
+- 可视化模型残差的自相关函数，观察其是否存在自相关性。
+- 杨-博克斯检验（Ljung-Box test），检验时间序列整体的随机性。
+
+#### 使用 $AR(p)$ 来进行预测
+
+参数确定后，$AR(p)$ 模型的预测函数为：
+$$
+y_t = \phi_0 + \sum_{i = 1}^{p} \phi_i \times y_{t - i} + e_t
+$$
+
+使用代码预测：
+
+```python
+model.fit(X_train, y_train)
+y_pred = model.predict(y_test)
+```
+
+### 移动平均模型
+
+移动平均（moving average, MA）模型基于一种随机过程，其中每个时间点的值是最近过去值的“误差”项的函数，并且各项彼此独立。
